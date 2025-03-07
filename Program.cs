@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
-
+// Last update: 07/03/2025                
 
 class CopyFolder
 {
@@ -61,6 +61,11 @@ class CopyFolder
             Console.WriteLine($"Error checking directory: {ex.Message}");
             return false;
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
+            return false;
+        }
     }
     public virtual bool IsDestinationFolderExisting(string USB_Destination, int num)
     {
@@ -76,6 +81,11 @@ class CopyFolder
         catch (Exception ex) when (ex is UnauthorizedAccessException || ex is PathTooLongException || ex is NotSupportedException)
         {
             Console.WriteLine($"Error checking directory: {ex.Message}");
+            return false;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
             return false;
         }
     }
@@ -387,7 +397,7 @@ public class HelloWorld
         }
 
 
-
+        string forbidden_directory = "C:\\Users\\User\\Desktop\\target_folder";         // as the name implies, this is reserved for the copy process 
         string source_directory;
         string read_command;
         Console.Clear();
@@ -400,12 +410,17 @@ public class HelloWorld
             a.SourceFolder = source_directory;
             a.perform_validation_check();
             Console.Clear();
-            Console.WriteLine(a.SourceFolder);
             if (source_directory == "end")
             {
                 break;
             }
-            else if (source_directory == "C:\\Users\\User\\Desktop\\target_folder")
+            else if(string.IsNullOrEmpty(source_directory))    // just in case the user fucks up somehow
+            {
+                Console.WriteLine("You didn't write anything/ null value assigned");
+                Console.WriteLine("Press any key to continue");
+                Console.ReadKey();
+            }
+            else if (source_directory.Replace("\\", "") == forbidden_directory.Replace("\\", ""))    // string result = input.Replace("X", ""); // Removes all 'X' characters
             {
                 Console.WriteLine("Folder reserved for organizing files, don't touch! ");
                 Console.WriteLine("Press any key to continue");
@@ -413,7 +428,6 @@ public class HelloWorld
             }
             else if (a.ValidSource)
             {
-                Console.Clear();
                 Console.WriteLine("The folder you entered is a valid folder. The folder you will be using is:  ");
                 Console.WriteLine(a.SourceFolder);
                 Console.WriteLine("Type \"yes\" if you wish to continue. Type \"no\" if you wish to enter a different source directory  ");
@@ -428,7 +442,7 @@ public class HelloWorld
                     Console.ReadKey();
                     var usbDrive = DriveInfo.GetDrives()
                         .FirstOrDefault(d => d.DriveType == DriveType.Removable && d.IsReady);
-                    if(usbDrive!=null)      //found USB drive
+                    if (usbDrive != null)      //found USB drive
                     {
                         Console.Clear();
                         Console.Write("USB device detected: ");
@@ -439,12 +453,12 @@ public class HelloWorld
                         read_command = Console.ReadLine();
                         Console.Clear();
 
-                        if(read_command== "yes")
+                        if (read_command == "yes")
                         {
                             Console.WriteLine("Beginning process...");
-                            a.SourceFolder= "C:\\Users\\User\\Desktop\\target_folder";
+                            a.SourceFolder = "C:\\Users\\User\\Desktop\\target_folder";
                             int i = 0;
-                            for(; i<max_amount_of_files; i++)
+                            for (; i < max_amount_of_files; i++)
                             {
                                 if (a.IsDestinationFolderExisting(usbDrive.Name, i)) break;
                             }
@@ -464,7 +478,7 @@ public class HelloWorld
                         // Not much to do here...
                     }
                 }
-                else if(read_command == "no")
+                else if (read_command == "no")
                 {
                     Console.WriteLine("Process aborted, press any key to continue");
                     Console.ReadKey();
@@ -477,7 +491,6 @@ public class HelloWorld
             }
             else
             {
-                Console.Clear();
                 Console.WriteLine("The source directory you entered is invalid, please try again...");
                 Console.WriteLine("Press any key to continue");
                 Console.ReadKey();
